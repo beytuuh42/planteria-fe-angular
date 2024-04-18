@@ -7,11 +7,17 @@ import { environment } from 'environments/environment.prod';
   standalone: true,
   imports: [],
   templateUrl: './footer.component.html',
-  styleUrl: './footer.component.scss'
+  styleUrl: './footer.component.scss',
 })
 export class FooterComponent {
   constructor(private plantService: PlantService) {
-    //console.log("Mode: ", process.env)
-    console.log("REST_API_URL: ", environment.REST_API_URL)
+    console.log('REST_API_URL: ', environment.baseUrl);
+  }
+
+  onReq() {
+    console.log('onReq');
+    let res = this.plantService.getAllPlants().subscribe((data) => {
+      console.log(data);
+    });
   }
 }
