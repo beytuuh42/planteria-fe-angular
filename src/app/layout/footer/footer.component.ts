@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { environment } from 'environments/environment.prod';
 
 @Component({
   selector: 'app-footer',
@@ -8,5 +9,7 @@ import { Component } from '@angular/core';
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
-
+  constructor() {
+    console.log("DB_NAME: ", environment.REST_API_URL)
+  }
 }
