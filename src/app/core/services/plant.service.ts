@@ -11,6 +11,6 @@ export class PlantService {
   constructor(private http: HttpClient) {}
 
   getAllPlants(): Observable<Plant[]> {
-    return this.http.get(`${environment.REST_API_URL}/plants`);
+    return this.http.get<Plant[]>(`${environment.REST_API_URL}/plants`);
   }
 }

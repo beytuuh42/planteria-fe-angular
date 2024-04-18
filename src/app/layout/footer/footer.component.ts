@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PlantService } from '@app/core/services/plant.service';
 import { environment } from 'environments/environment.prod';
 
 @Component({
@@ -9,7 +10,8 @@ import { environment } from 'environments/environment.prod';
   styleUrl: './footer.component.scss'
 })
 export class FooterComponent {
-  constructor() {
-    console.log("DB_NAME: ", environment.REST_API_URL)
+  constructor(private plantService: PlantService) {
+    //console.log("Mode: ", process.env)
+    console.log("REST_API_URL: ", environment.REST_API_URL)
   }
 }
