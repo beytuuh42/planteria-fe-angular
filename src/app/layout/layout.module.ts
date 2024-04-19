@@ -5,6 +5,7 @@ import { FooterComponent } from '@layout//footer/footer.component';
 import { HeaderComponent } from '@layout//header/header.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { PlantService } from '@app/core/services/plant.service';
+import { MainComponent } from './main/main.component';
 
 @NgModule({
   providers: [
@@ -15,12 +16,14 @@ import { PlantService } from '@app/core/services/plant.service';
     CommonModule,
     NavbarComponent,
     FooterComponent,
-    HeaderComponent
+    HeaderComponent,
+    MainComponent
   ],
   exports: [
     NavbarComponent,
     FooterComponent,
-    HeaderComponent
+    HeaderComponent,
+    MainComponent
   ]
 })
 export class LayoutModule { }
