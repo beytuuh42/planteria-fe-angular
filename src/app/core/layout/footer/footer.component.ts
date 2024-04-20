@@ -16,7 +16,7 @@ export class FooterComponent {
 
   onReq() {
     console.log('onReq');
-    let res = this.plantService.getAllPlants().subscribe((data) => {
+    let res = this.plantService.getPlants().subscribe((data) => {
       console.log(data);
     });
   }

@@ -10,9 +10,14 @@ import { environment } from 'environments/environment';
 export class PlantService {
   constructor(private http: HttpClient) {}
 
-  getAllPlants(): Observable<Plant[]> {
+  getPlants(): Observable<Plant[]> {
     let endpoint = `${environment.baseUrl}/plants/`;
     return this.http.get<Plant[]>(endpoint).pipe(catchError(this.handleError));
+  }
+
+  getPlant(id: number): Observable<Plant> {
+    let endpoint = `${environment.baseUrl}/plants/${id}`;
+    return this.http.get<Plant>(endpoint).pipe(catchError(this.handleError));
   }
 
   private handleError(error: HttpErrorResponse) {

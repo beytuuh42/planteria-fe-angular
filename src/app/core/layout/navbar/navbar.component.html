@@ -1,0 +1,50 @@
+<nav class="nav flex-column mb-auto bg-dark text-white h-100">
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item">
+      <a
+        class="nav-link text-white"
+        routerLinkActive="active"
+        routerLink="/home"
+        #isHome="routerLinkActive"
+      >
+        <i
+          class="bi me-2"
+          [ngClass]="!isHome.isActive ? 'bi-house-door-fill' : 'bi-house-door'"
+        ></i
+        >Home
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link text-white"
+        routerLinkActive="active"
+        routerLink="/plants"
+        #isPlants="routerLinkActive"
+      >
+        <i
+          class="bi me-2"
+          [ngClass]="!isPlants.isActive ? 'bi-tree-fill' : 'bi-tree'"
+        ></i
+        >Plants
+      </a>
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link text-white"
+        routerLinkActive="active"
+        routerLink="/settings"
+        #isSettings="routerLinkActive"
+      >
+        <i
+          class="bi me-2"
+          [ngClass]="!isSettings.isActive ? 'bi-gear-fill' : 'bi-gear'"
+        ></i
+        >Settings
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<footer class="bg-light border-top text-center py-2 mt-auto">
+  Sidebar Footer
+</footer>

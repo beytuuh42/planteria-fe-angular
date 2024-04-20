@@ -1,22 +1,32 @@
 import { Routes } from '@angular/router';
-import { HomeComponent } from './core/home/home.component';
-import { ErrorComponent } from './core/error/error.component';
 
-export const ROUTES: Routes = [
+import { ErrorComponent } from './core/pages/error/error.component';
+import { HomeComponent } from './modules/components/home/home.component';
+
+export const routes: Routes = [
   {
     path: 'home',
     component: HomeComponent,
   },
   {
-    path: 'user',
-    loadComponent: () =>
-      import('./core/user/user.component').then((m) => m.UserComponent),
+    path: 'plants',
+    loadChildren: () =>
+      import('./modules/components/plants/plant.routes').then(
+        (m) => m.PLANT_ROUTES
+      ),
   },
   {
     path: 'settings',
     loadComponent: () =>
-      import('./core/settings/settings.component').then(
+      import('./core/pages/settings/settings.component').then(
         (m) => m.SettingsComponent
+      ),
+  },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./modules/components/auth/auth.routes').then(
+        (m) => m.AUTH_ROUTES
       ),
   },
   {
