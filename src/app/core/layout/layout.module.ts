@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FooterComponent } from './footer/footer.component';
 import { HeaderComponent } from './header/header.component';
 import { NavbarComponent } from './navbar/navbar.component';
-import { PlantService } from '@app/core/services/plant.service';
+import { PlantService } from '@app/core/services/plants/plant.service';
 import { MainComponent } from './main/main.component';
 
 @NgModule({
