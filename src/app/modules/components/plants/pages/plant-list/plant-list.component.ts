@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, TemplateRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Plant } from '@app/core/models/plant.model';
-import { PlantService } from '@app/core/services/plant.service';
+import { IPlant } from '@app/core/models/plant.model';
+import { PlantService } from '@app/core/services/plants/plant.service';
 import { tap } from 'rxjs';
 import { JsonPipe } from '@angular/common';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -17,11 +17,11 @@ export class PlantListComponent {
   private modalService = inject(NgbModal);
 
   plantService = inject(PlantService);
-  plants: Plant[] = [];
+  plants: IPlant[] = [];
 
   ngOnInit(): void {
     this.plantService
-      .getPlants()
+      .getList()
       .pipe(
         tap((data) => {
           console.log(data);
@@ -31,14 +31,14 @@ export class PlantListComponent {
         this.plants = data;
       });
 
-    this.plantService.getPlants().subscribe((data) => {
+    this.plantService.getList().subscribe((data) => {
       this.plants = data;
     });
   }
 
-  onEdit(content: TemplateRef<any>, plant: Plant) {
+  onEdit(content: TemplateRef<any>, plant: IPlant) {
     const modalRef = this.modalService.open(content, { size: 'lg' });
-    console.log(plant)
+    console.log(plant);
     console.log('modalRef.componentInstance:', modalRef.componentInstance);
 
     modalRef.componentInstance.plant = plant;

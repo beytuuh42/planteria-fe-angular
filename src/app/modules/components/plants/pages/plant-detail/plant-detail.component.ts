@@ -1,7 +1,7 @@
 import { Component, Input, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Plant } from '@app/core/models/plant.model';
-import { PlantService } from '@app/core/services/plant.service';
+import { IPlant } from '@app/core/models/plant.model';
+import { PlantService } from '@app/core/services/plants/plant.service';
 
 @Component({
   selector: 'app-plant-detail',
@@ -13,12 +13,12 @@ import { PlantService } from '@app/core/services/plant.service';
 export class PlantDetailComponent {
   private plantService = inject(PlantService);
   route = inject(ActivatedRoute);
-  plant: Plant | undefined;
+  plant: IPlant | undefined;
 
   constructor() {
     const plantId = Number(this.route.snapshot.paramMap.get('id'));
-    this.plantService.getPlant(plantId).subscribe((data) => {
+    this.plantService.get(plantId).subscribe((data) => {
       this.plant = data;
-    })
+    });
   }
 }
