@@ -11,7 +11,7 @@ export class PlantService {
   constructor(private http: HttpClient) {}
 
   getPlants(): Observable<Plant[]> {
-    let endpoint = `${environment.baseUrl}/plants/`;
+    let endpoint = `${environment.baseUrl}/plants`;
     return this.http.get<Plant[]>(endpoint).pipe(catchError(this.handleError));
   }
 
