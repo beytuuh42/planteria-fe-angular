@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ILoginUser } from '@app/core/models/loginuser';
+import { ILoginUser } from '@app/core/models/login-user.model';
 import { AuthService } from '@app/core/services/auth/auth.service';
 
 @Component({
