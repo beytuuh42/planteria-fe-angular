@@ -1,0 +1,12 @@
+.card-title {
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
+}
+
+.card {
+    img:hover {
+        cursor: pointer;
+    }
+}
