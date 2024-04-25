@@ -3,23 +3,20 @@ import { Injectable } from '@angular/core';
 import { BaseService } from '../base.service';
 import { IUser } from '@app/core/models/user.model';
 import { Observable, catchError } from 'rxjs';
-import { ILoginUser } from '@app/core/models/loginuser';
+import { ILoginUser } from '@app/core/models/login-user.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService extends BaseService<IUser> {
+  protected override resource = 'auth';
   constructor(http: HttpClient) {
     super(http);
   }
 
-  override getResourceUrl(): string {
-    return 'auth';
-  }
-
   login(user: ILoginUser): Observable<ILoginUser> {
     return this.httpClient
-      .post<IUser>(`${this.baseUrl}/${this.getResourceUrl()}/login`, user, {
+      .post<IUser>(`${this.getEndpoint()}/login`, user, {
         withCredentials: true,
       })
       .pipe(catchError(super.handleError));
@@ -27,13 +24,13 @@ export class AuthService extends BaseService<IUser> {
 
   register(user: IUser): Observable<IUser> {
     return this.httpClient
-      .post<IUser>(`${this.baseUrl}/${this.getResourceUrl()}/register`, user)
+      .post<IUser>(`${this.getEndpoint()}/register`, user)
       .pipe(catchError(super.handleError));
   }
 
   logout(): Observable<any> {
     return this.httpClient
-      .post(`${this.baseUrl}/${this.getResourceUrl()}/logout`, null, {
+      .post(`${this.getEndpoint()}/logout`, null, {
         withCredentials: true,
       })
       .pipe(catchError(super.handleError));

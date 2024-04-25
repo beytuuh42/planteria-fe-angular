@@ -4,55 +4,58 @@ import { environment } from 'environments/environment';
 import { Observable, catchError, throwError } from 'rxjs';
 import { IBase } from '../models/base.model';
 
-export interface ServiceConfig {
-  resourceEndpoint: string;
-}
-
-export const SERVICE_CONFIG = new InjectionToken<ServiceConfig>(
-  'ServiceConfig'
-);
-
 @Injectable({
   providedIn: 'root',
 })
 export abstract class BaseService<T> {
-  protected readonly baseUrl = environment.baseUrl;
-
-  abstract getResourceUrl(): string;
+  protected abstract resource: string;
 
   constructor(protected httpClient: HttpClient) {}
 
-  //getList(page: number, count: number): Observable<T[]> {
-  getList(): Observable<T[]> {
+  getBaseUrl(): string {
+    return environment.baseUrl;
+  }
+
+  getBaseApiUrl(): string {
+    return environment.baseApiUrl;
+  }
+
+  protected getEndpoint(id?: number): string {
+    if (id) {
+      return `${this.getBaseApiUrl()}/${this.resource}/${id}`;
+    } else {
+      return `${this.getBaseApiUrl()}/${this.resource}`;
+    }
+  }
+
+  getList(url: string = this.getEndpoint()): Observable<T[]> {
     // let params = new HttpParams()
     // 	.set('page', page.toString())
     // 	.set('count', count.toString());
 
-    return this.httpClient
-      .get<T[]>(`/${this.baseUrl}/${this.getResourceUrl()}`)
-      .pipe(catchError(this.handleError));
+    return this.httpClient.get<T[]>(url).pipe(catchError(this.handleError));
   }
 
   get(id: number): Observable<T> {
     return this.httpClient
-      .get<T>(`${this.baseUrl}/${this.getResourceUrl}/${id}`)
+      .get<T>(this.getEndpoint(id))
       .pipe(catchError(this.handleError));
   }
 
   add(resource: T): Observable<any> {
     return this.httpClient
-      .post(`${this.baseUrl}/${this.getResourceUrl}`, resource)
+      .post(this.getEndpoint(), resource)
       .pipe(catchError(this.handleError));
   }
 
   update(resource: T) {
     return this.httpClient
-      .put(`${this.baseUrl}/${this.getResourceUrl}`, resource)
+      .put(this.getEndpoint(), resource)
       .pipe(catchError(this.handleError));
   }
-  delete(id: string | number): Observable<any> {
+  delete(id: number): Observable<any> {
     return this.httpClient
-      .delete(`${this.baseUrl}/${this.getResourceUrl}`)
+      .delete(this.getEndpoint(id))
       .pipe(catchError(this.handleError));
   }
 
