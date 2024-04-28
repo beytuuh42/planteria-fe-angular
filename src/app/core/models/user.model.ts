@@ -1,6 +1,6 @@
 import { IBase } from './base.model';
-import { ILoginUser } from './login-user.model';
+import { ILoginToken } from './login-token.model';
 
-export interface IUser extends ILoginUser, IBase {
+export interface IUser extends ILoginToken, IBase {
   name: string;
 }

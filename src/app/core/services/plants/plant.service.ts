@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import { IPlant } from '../../models/plant.model';
 import { Observable, catchError, throwError, tap } from 'rxjs';
 import { environment } from 'environments/environment';
-import { BaseService } from '../base.service';
+import { BaseCrudService } from '../base.service';
 import { IPlantImage } from '@app/core/models/plant-image.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PlantService extends BaseService<IPlant> {
+export class PlantService extends BaseCrudService<IPlant> {
   protected override resource = 'plants';
 
   constructor(private http: HttpClient) {

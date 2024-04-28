@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ILoginUser } from '@app/core/models/login-user.model';
+import { ILoginToken } from '@app/core/models/login-token.model';
 import { AuthService } from '@app/core/services/auth/auth.service';
 
 @Component({
@@ -33,14 +33,14 @@ export class LoginComponent {
 
   onLogin(): void {
     console.log(this.loginForm.getRawValue());
-    let user: ILoginUser = this.loginForm.getRawValue();
+    let user: ILoginToken = this.loginForm.getRawValue();
     this.authService.login(user).subscribe({
       next: (data) => {
-        console.log('Successful login: ', data);
-        //this.router.navigate(['/home']);
+        alert('Successful login!');
+        this.router.navigate(['/home']);
       },
       error: (error) => {
-        console.log('Invalid email or password: ', error);
+        alert('Wrong credentials!');
       },
     });
   }
