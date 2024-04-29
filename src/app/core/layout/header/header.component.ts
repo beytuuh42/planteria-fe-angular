@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '@app/core/services/auth/auth.service';
 @Component({
   selector: 'app-header',
@@ -10,13 +10,15 @@ import { AuthService } from '@app/core/services/auth/auth.service';
 })
 export class HeaderComponent {
   authService = inject(AuthService);
+  router = inject(Router);
   onLogout() {
     this.authService.logout().subscribe({
       next: () => {
-        console.log('logged out');
+        alert('logged out');
+        this.router.navigate(['login']);
       },
       error: (error) => {
-        console.log(error);
+        console.error('Logout failed:', error);
       },
     });
   }

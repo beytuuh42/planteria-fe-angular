@@ -14,7 +14,7 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { ILoginToken } from '@app/core/models/login-token.model';
+import { ILoginUser } from '@app/core/models/login-user.model';
 import { ApiService } from '../api.service';
 import { CookieService } from 'ngx-cookie-service';
 import { Router } from '@angular/router';
@@ -23,6 +23,8 @@ import {
   ERROR_AUTH_INVALID_TOKEN,
   ERROR_AUTH_NOT_LOGGED_IN,
 } from '@app/core/constants/errors';
+import { IResponseToken } from '@app/core/models/response-token.model';
+import { IDecodedToken } from '@app/core/models/decoded-token.model';
 
 @Injectable({
   providedIn: 'root',
@@ -37,9 +39,55 @@ export class AuthService extends ApiService {
     super(http);
   }
 
-  login(user: ILoginToken): Observable<ILoginToken> {
+  private getDecodedToken(isAccess: boolean): IDecodedToken | null {
+    const token = isAccess ? this.getAccessToken() : this.getRefreshToken();
+    if (!token) return null;
+
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3) return null;
+
+    const encodedPayload = tokenParts[1];
+    try {
+      const decodedPayload = window.atob(encodedPayload);
+      const payloadJson = JSON.parse(decodedPayload);
+      const { token_type, exp, iat, jti, user_id } = payloadJson;
+
+      // Validate required properties
+      if (
+        typeof token_type !== 'string' ||
+        typeof exp !== 'number' ||
+        typeof iat !== 'number' ||
+        typeof jti !== 'string' ||
+        typeof user_id !== 'number'
+      ) {
+        return null;
+      }
+
+      return {
+        token_type,
+        exp,
+        iat,
+        jti,
+        user_id,
+      };
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getDecodedToken(true) || this.getDecodedToken(false);
+
+    if (!token) return false;
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    return token.exp > currentTime;
+  }
+
+  login(user: ILoginUser): Observable<IResponseToken> {
     return this.httpClient
-      .post<IUser>(`${this.getEndpoint()}/login`, user, {
+      .post<IResponseToken>(`${this.getEndpoint()}/login`, user, {
         withCredentials: true,
       })
       .pipe(
@@ -57,9 +105,9 @@ export class AuthService extends ApiService {
       );
   }
 
-  refreshToken(): Observable<ILoginToken> {
+  refreshToken(): Observable<IResponseToken> {
     return this.httpClient
-      .post<IUser>(
+      .post<IResponseToken>(
         `${this.getEndpoint()}/login/refresh`,
         { refresh: this.getRefreshToken() },
         {
