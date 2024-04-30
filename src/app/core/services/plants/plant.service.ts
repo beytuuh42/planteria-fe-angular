@@ -23,7 +23,7 @@ export class PlantService extends BaseCrudService<IPlant> {
       tap((data) => {
         console.log(data);
       }),
-      catchError(this.handleError)
+      catchError((err) => throwError(() => err))
     );
     return obs;
   }

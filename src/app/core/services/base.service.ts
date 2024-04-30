@@ -16,29 +16,31 @@ export abstract class BaseCrudService<T> extends ApiService {
     // 	.set('page', page.toString())
     // 	.set('count', count.toString());
 
-    return this.httpClient.get<T[]>(url).pipe(catchError(this.handleError));
+    return this.httpClient
+      .get<T[]>(url)
+      .pipe(catchError((err) => throwError(() => err)));
   }
 
   get(id: number): Observable<T> {
     return this.httpClient
       .get<T>(this.getEndpoint(id))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((err) => throwError(() => err)));
   }
 
   add(resource: T): Observable<any> {
     return this.httpClient
       .post(this.getEndpoint(), resource)
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((err) => throwError(() => err)));
   }
 
   update(resource: T) {
     return this.httpClient
       .put(this.getEndpoint(), resource)
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((err) => throwError(() => err)));
   }
   delete(id: number): Observable<any> {
     return this.httpClient
       .delete(this.getEndpoint(id))
-      .pipe(catchError(this.handleError));
+      .pipe(catchError((err) => throwError(() => err)));
   }
 }

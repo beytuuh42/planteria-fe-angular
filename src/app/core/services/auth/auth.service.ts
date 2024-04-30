@@ -9,6 +9,7 @@ import { IUser } from '@app/core/models/user.model';
 import {
   EMPTY,
   Observable,
+  Subject,
   catchError,
   switchMap,
   tap,
@@ -31,12 +32,94 @@ import { IDecodedToken } from '@app/core/models/decoded-token.model';
 })
 export class AuthService extends ApiService {
   protected override resource = 'auth';
+  private readonly accessTokenKey = 'access_token';
+  private readonly refreshTokenKey = 'refresh_token';
 
   cookieService = inject(CookieService);
   router = inject(Router);
 
+  refreshTokenInProgress = false;
+  tokenRefreshedSource = new Subject();
+  tokenRefreshed$ = this.tokenRefreshedSource.asObservable();
+
   constructor(http: HttpClient) {
     super(http);
+  }
+
+  register(user: IUser): Observable<IUser> {
+    return this.httpClient
+      .post<IUser>(`${this.getEndpoint()}/register`, user)
+      .pipe(catchError((err) => throwError(() => err)));
+  }
+
+  login(user: ILoginUser): Observable<IResponseToken> {
+    return this.httpClient
+      .post<IResponseToken>(`${this.getEndpoint()}/login`, user, {
+        withCredentials: true,
+      })
+      .pipe(
+        tap((response) => this.setTokens(response)),
+        catchError((err: any) => {
+          return throwError(() => err);
+        })
+      );
+  }
+
+  logout(): Observable<any> {
+    return this.httpClient
+      .post(
+        `${this.getEndpoint()}/logout`,
+        { refresh: this.getRefreshToken() },
+        {
+          withCredentials: true,
+        }
+      )
+      .pipe(
+        tap({
+          complete: () => {
+            this.setTokens({ access: '', refresh: '' });
+          },
+        })
+      );
+  }
+
+  refreshToken(): Observable<IResponseToken> {
+    console.log('Attempting token refresh...');
+    return this.httpClient
+      .post<IResponseToken>(
+        `${this.getEndpoint()}/login/refresh`,
+        { refresh: this.getRefreshToken() },
+        { withCredentials: true }
+      )
+      .pipe(
+        tap((response) => this.setTokens(response)),
+        catchError((error) => {
+          console.error('Error refreshing token:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  private setTokens(token: IResponseToken): void {
+    this.cookieService.set(this.accessTokenKey, token.access);
+    this.cookieService.set(this.refreshTokenKey, token.refresh);
+  }
+
+  getAccessToken(): string {
+    return this.cookieService.get(this.accessTokenKey);
+  }
+
+  private getRefreshToken(): string {
+    return this.cookieService.get(this.refreshTokenKey);
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getDecodedToken(true) || this.getDecodedToken(false);
+
+    if (!token) return false;
+
+    const currentTime = Math.floor(Date.now() / 1000);
+    return token.exp > currentTime;
   }
 
   private getDecodedToken(isAccess: boolean): IDecodedToken | null {
@@ -76,124 +159,22 @@ export class AuthService extends ApiService {
     }
   }
 
-  isLoggedIn(): boolean {
-    const token = this.getDecodedToken(true) || this.getDecodedToken(false);
-
-    if (!token) return false;
-    
-    const currentTime = Math.floor(Date.now() / 1000);
-    return token.exp > currentTime;
-  }
-
-  login(user: ILoginUser): Observable<IResponseToken> {
-    return this.httpClient
-      .post<IResponseToken>(`${this.getEndpoint()}/login`, user, {
-        withCredentials: true,
-      })
-      .pipe(
-        tap((response) => {
-          if (response.access && response.refresh) {
-            this.cookieService.set('access_token', response.access);
-            this.cookieService.set('refresh_token', response.refresh);
-          }
-        }),
-        catchError((err: any) => {
-          return throwError(() =>
-            console.error('Login error in authservice:', err)
-          );
-        })
-      );
-  }
-
-  refreshToken(): Observable<IResponseToken> {
-    return this.httpClient
-      .post<IResponseToken>(
-        `${this.getEndpoint()}/login/refresh`,
-        { refresh: this.getRefreshToken() },
-        {
-          withCredentials: true,
-        }
-      )
-      .pipe(
-        tap((response) => {
-          if (response.access && response.refresh) {
-            this.cookieService.set('access_token', response.access);
-            this.cookieService.set('refresh_token', response.refresh);
-            console.log('Refreshed token');
-          } else {
-            console.log('Failed to retrieve refreshed token!');
-          }
-        }),
-        catchError(super.handleError)
-      );
-  }
-
-  register(user: IUser): Observable<IUser> {
-    return this.httpClient
-      .post<IUser>(`${this.getEndpoint()}/register`, user)
-      .pipe(catchError(super.handleError));
-  }
-
-  logout(): Observable<any> {
-    return this.httpClient
-      .post(`${this.getEndpoint()}/logout`, null, {
-        withCredentials: true,
-      })
-      .pipe(catchError(super.handleError));
-  }
-
-  getAccessToken(): string {
-    return this.cookieService.get('access_token');
-  }
-
-  getRefreshToken(): string {
-    return this.cookieService.get('refresh_token');
-  }
-
-  private handleInvalidToken(req: HttpRequest<unknown>, next: HttpHandlerFn) {
-    return this.refreshToken().pipe(
-      switchMap(() => {
-        console.log('Token refresh successful');
-        const newReq = req.clone({
-          setHeaders: {
-            Authorization: `Bearer ${this.getAccessToken()}`,
-          },
-        });
-        return next(newReq);
-      }),
-      catchError((refreshError: any) => {
-        console.error('Token refresh failed:', refreshError);
-        this.router.navigate(['login']);
-        return EMPTY;
-      })
-    );
-  }
-
   handleAuthError(
     error: HttpErrorResponse,
     request: HttpRequest<unknown>,
     next: HttpHandlerFn
   ): Observable<any> {
-    if (error.status === 401) {
-      if (error.error.detail.includes(ERROR_AUTH_INVALID_CREDENTIALS)) {
-        console.error('Invalid credentials');
-        return throwError(() => new Error('Invalid credentials.'));
-      } else if (error.error.code === ERROR_AUTH_INVALID_TOKEN) {
-        console.error('Token expired or invalid, attempting token refresh...');
-        return this.handleInvalidToken(request, next);
-      } else if (error.error.code === ERROR_AUTH_NOT_LOGGED_IN) {
-        console.error('Token expired or invalid, attempting token refresh...');
-        this.router.navigate(['login']);
-        return EMPTY;
-      }
-    } else {
-      console.error(
-        `Backend returned auth code ${error.status}, body was: `,
-        error.error
-      );
+    if (error.error.detail.includes(ERROR_AUTH_INVALID_CREDENTIALS)) {
+      return throwError(() => new Error('Invalid credentials.'));
+    } else if (error.error.code === ERROR_AUTH_INVALID_TOKEN) {
+      return EMPTY;
+      //return this.handleInvalidToken(error, request, next);
+    } else if (error.error.code === ERROR_AUTH_NOT_LOGGED_IN) {
+      console.error('Token expired or invalid, attempting token refresh...');
+      this.router.navigate(['login']);
+      return throwError(() => new Error('Invalid token.'));
     }
-    return throwError(
-      () => new Error('Something bad happened in auth; please try again later.')
-    );
+
+    return throwError(() => new Error('Unhandled auth error.'));
   }
 }
