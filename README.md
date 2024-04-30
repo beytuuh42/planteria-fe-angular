@@ -26,8 +26,9 @@ Following relevant packages:
 
 ## Roadmap
 - [ ] image comprimizing
-- [ ] cache data
-- [ ] auth 
-    - [ ] interceptor
-    - [ ] guard
+- [ X ] cache data
+    - [ ] improve logic (timeout?)
+- [x] auth 
+    - [x] interceptor
+    - [x] guard
 - [ ] More

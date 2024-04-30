@@ -32,7 +32,6 @@ function addTokenToHeader(
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const token = authService.getAccessToken();
 
   let refreshTokenInProgress = false;
   let tokenRefreshedSource = new Subject();
@@ -48,7 +47,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       });
     } else {
       refreshTokenInProgress = true;
-
       return authService.refreshToken().pipe(
         tap((token) => {
           refreshTokenInProgress = false;
@@ -104,8 +102,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return throwError(() => error);
   };
 
-  if (!token) router.navigate(['login']);
-
+  const token = authService.getAccessToken();
+  //if (!token) router.navigate(['login']);
   let newReq = addTokenToHeader(req, token);
 
   return next(newReq).pipe(

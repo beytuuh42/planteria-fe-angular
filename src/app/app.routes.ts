@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { ErrorComponent } from './core/pages/error/error.component';
 import { HomeComponent } from './modules/components/home/home.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -14,6 +15,7 @@ export const routes: Routes = [
       import('./modules/components/plants/plant.routes').then(
         (m) => m.PLANT_ROUTES
       ),
+    canActivate: [authGuard],
   },
   {
     path: 'settings',
@@ -21,6 +23,11 @@ export const routes: Routes = [
       import('./core/pages/settings/settings.component').then(
         (m) => m.SettingsComponent
       ),
+  },
+  {
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full',
   },
   {
     path: '',
@@ -32,11 +39,6 @@ export const routes: Routes = [
   {
     path: 'error',
     component: ErrorComponent,
-  },
-  {
-    path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
   },
   {
     path: '**',
