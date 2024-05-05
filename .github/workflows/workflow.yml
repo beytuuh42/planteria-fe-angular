@@ -17,7 +17,7 @@ jobs:
 
       - name: Install and Build
         working-directory: .
-        run: npm install && npm run gh-pages build
+        run: npm install && npm run gh-pages:build
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
